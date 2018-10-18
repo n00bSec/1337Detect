@@ -12,7 +12,6 @@ import (
 	"sync"
 )
 
-
 // Configuration
 var leet_dict string
 var wordlist_file string
@@ -20,7 +19,7 @@ var verbose bool
 var show_help bool
 
 // In-Memory Storage
-var dictionary map [string] []string
+var dictionary map[string][]string
 var regex_wordlist []regexp.Regexp
 
 // Parallelism
@@ -43,17 +42,17 @@ func wordToRegex(word string) string {
 	// Add additional parts here!
 	result.WriteString("|")
 	result.WriteString("(")
-	for _,c := range word {
+	for _, c := range word {
 		var possible_matches_char []string
 		possible_matches_char = append(possible_matches_char, string(c))
-		if string(c) == strings.ToUpper(string(c)){
+		if string(c) == strings.ToUpper(string(c)) {
 			possible_matches_char = append(possible_matches_char,
-					strings.ToLower(string(c)))
+				strings.ToLower(string(c)))
 		} else {
 			possible_matches_char = append(possible_matches_char,
-					strings.ToUpper(string(c)))
+				strings.ToUpper(string(c)))
 		}
-		for _,item := range dictionary[string(c)] {
+		for _, item := range dictionary[string(c)] {
 			if len(item) < 1 {
 				continue
 			}
@@ -61,16 +60,16 @@ func wordToRegex(word string) string {
 				fmt.Printf("\t%s\n", item)
 			}
 			r := strings.NewReplacer(
-					"[", "\\[",
-					"]", "\\]",
-					"\\", "[\\\\]",
-					"|", "\\|",
-					"(", "\\(",
-					")", "\\)",
-					"}", "\\}",
-					"{", "\\{",
-					"+", "\\+",
-					"*", "\\*",
+				"[", "\\[",
+				"]", "\\]",
+				"\\", "[\\\\]",
+				"|", "\\|",
+				"(", "\\(",
+				")", "\\)",
+				"}", "\\}",
+				"{", "\\{",
+				"+", "\\+",
+				"*", "\\*",
 			)
 			item = r.Replace(item)
 			possible_matches_char = append(possible_matches_char, item)
@@ -89,7 +88,7 @@ func wordToRegex(word string) string {
 /*
  * Returns true if successful, false with error if not.
  */
-func loadDictionary() (bool, error){
+func loadDictionary() (bool, error) {
 	dictionary = make(map[string][]string)
 
 	f, err := os.Open(leet_dict)
@@ -112,12 +111,12 @@ func loadDictionary() (bool, error){
 		possible_repls := strings.Split(key_val[1], ",")
 
 		// Trim all words
-		for i,v := range possible_repls {
+		for i, v := range possible_repls {
 			possible_repls[i] = strings.TrimSpace(v)
 		}
 
 		if verbose {
-			fmt.Printf("Adding %s:%s\n", key_val[0], strings.Join(possible_repls,","))
+			fmt.Printf("Adding %s:%s\n", key_val[0], strings.Join(possible_repls, ","))
 		}
 
 		// Store upper and lowercase, just in case. :p
@@ -131,7 +130,7 @@ func loadDictionary() (bool, error){
 /*
  * Returns true if successful, false with error if not.
  */
-func loadWordlist() (bool, error){
+func loadWordlist() (bool, error) {
 	regex_wordlist = []regexp.Regexp{}
 
 	// Use dictionary to generate list of regexes for matching replacements
@@ -172,7 +171,7 @@ func printHighlight(line string, subword string) {
 	fmt.Println()
 }
 
-func readLoop(){
+func readLoop() {
 	scanIn := bufio.NewScanner(os.Stdin)
 	onlyalpha := regexp.MustCompile("[A-Za-z]+")
 
@@ -183,10 +182,10 @@ func readLoop(){
 			continue
 		}
 
-		for _,regex := range regex_wordlist {
+		for _, regex := range regex_wordlist {
 			matches := regex.FindAll([]byte(line), -1)
 			if len(matches) > 0 {
-				for _,match := range matches {
+				for _, match := range matches {
 					alpha_text := onlyalpha.Find(match)
 					if alpha_text != nil && string(alpha_text) == string(match) {
 						// Skip if not 1337 speak.
@@ -199,14 +198,14 @@ func readLoop(){
 	}
 }
 
-func init(){
+func init() {
 	flag.StringVar(&leet_dict, "d", "list.dict", "Detection dictionary.")
 	flag.StringVar(&wordlist_file, "w", "words.txt", "Wordlist to detect on.")
 	flag.BoolVar(&verbose, "v", false, "Verbose mode.")
 	flag.BoolVar(&show_help, "h", false, "Show help menu.")
 }
 
-func main(){
+func main() {
 	flag.Parse()
 
 	if show_help {
